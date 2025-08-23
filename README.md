@@ -1,34 +1,43 @@
-# 色花堂磁力链接爬虫工具 v2.1.0
+# 🚀 色花堂磁力链接爬虫工具 v2.1.0
 
-一个功能强大的磁力链接爬虫工具，支持多主题爬取、代理设置、定时任务和实时日志监控。
+<div align="center">
 
-## 🚀 主要功能
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![React](https://img.shields.io/badge/React-18.0+-61dafb.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![GitHub](https://img.shields.io/badge/GitHub-wyhfx%2Fsehuatang--crawler-brightgreen.svg)
 
-### 📋 核心功能
-- **多主题支持**: 支持多个主题的磁力链接爬取
-- **双模式爬取**: 普通模式和热门模式
-- **批量爬取**: 支持指定页面范围进行批量爬取
-- **实时日志**: 首页实时显示操作日志，便于监控爬取过程
+**功能强大的磁力链接爬虫工具，支持多主题爬取、代理设置、定时任务和实时日志监控**
 
-### 🔧 高级功能
-- **代理支持**: 支持HTTP/HTTPS/SOCKS5代理，方便访问国外网站
-- **代理持久化**: 代理设置自动保存，无需重复配置
-- **定时任务**: 支持每日、每周、间隔执行三种调度模式
-- **任务管理**: 完整的任务生命周期管理（创建、编辑、删除、启用/禁用）
+[快速开始](#-快速开始) • [功能特性](#-功能特性) • [使用指南](#-使用指南) • [技术架构](#-技术架构)
 
-### 🎨 用户界面
-- **现代化UI**: 基于React + Ant Design的现代化界面
-- **响应式设计**: 适配不同屏幕尺寸
-- **实时更新**: 任务状态和日志实时更新
-- **多页面导航**: 首页和设置页面分离
+</div>
 
-## 📦 快速开始
+---
 
-### 使用Docker运行
+## 🎯 项目简介
+
+色花堂磁力链接爬虫工具是一个基于Python + React的现代化Web应用，提供强大的磁力链接爬取功能。支持多主题、多模式、代理设置、定时任务等高级功能，让您轻松获取所需的磁力链接。
+
+### ✨ 主要特性
+
+- 🎭 **多主题支持** - 支持亚洲无码、亚洲有码、国产原创等7个主题
+- 🔥 **双模式爬取** - 普通模式 + 热门模式，满足不同需求
+- 📄 **批量页面爬取** - 支持指定页面范围，高效批量处理
+- 🌐 **代理支持** - 支持HTTP/HTTPS/SOCKS5代理
+- 💾 **代理持久化** - 代理设置自动保存，无需重复配置
+- ⏰ **定时任务** - 支持每日、每周、间隔执行
+- 📊 **实时日志** - 首页实时显示操作日志
+- 🎨 **现代化UI** - 基于React + Ant Design的美观界面
+
+## 🚀 快速开始
+
+### 方式一：Docker运行（推荐）
 
 ```bash
-# 拉取镜像
-docker pull wyh3210277395/sehuatang-crawler:v2.1.0
+# 拉取最新镜像
+docker pull wyh3210277395/sehuatang-crawler:latest
 
 # 运行容器
 docker run -d \
@@ -36,26 +45,23 @@ docker run -d \
   -p 5000:5000 \
   -v ./data:/app/data \
   -v ./logs:/app/logs \
-  wyh3210277395/sehuatang-crawler:v2.1.0
+  wyh3210277395/sehuatang-crawler:latest
 ```
 
-### 使用Docker Compose运行
+### 方式二：Docker Compose运行
 
-```bash
-# 创建docker-compose.yml文件
+```yaml
+# docker-compose.yml
 version: '3.8'
 services:
   sehuatang-crawler:
-    image: wyh3210277395/sehuatang-crawler:v2.1.0
+    image: wyh3210277395/sehuatang-crawler:latest
     container_name: sehuatang-crawler
     ports:
       - "5000:5000"
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
-      - HTTP_PROXY=${HTTP_PROXY:-}
-      - HTTPS_PROXY=${HTTPS_PROXY:-}
-      - NO_PROXY=${NO_PROXY:-}
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -66,10 +72,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-networks:
-  default:
-    name: sehuatang-network
 ```
 
 ```bash
@@ -77,23 +79,50 @@ networks:
 docker-compose up -d
 ```
 
-## 🎯 使用指南
+### 方式三：本地开发运行
 
-### 1. 基本爬取
-1. 访问 `http://localhost:5000`
+```bash
+# 克隆项目
+git clone https://github.com/wyhfx/sehuatang-crawler.git
+cd sehuatang-crawler
+
+# 安装Python依赖
+pip install -r requirements.txt
+
+# 安装前端依赖
+cd frontend
+npm install
+npm run build
+cd ..
+
+# 运行应用
+python app.py
+```
+
+## 🌐 访问应用
+
+启动成功后，打开浏览器访问：
+```
+http://localhost:5000
+```
+
+## 📖 使用指南
+
+### 1️⃣ 基本爬取
+1. 访问应用首页
 2. 选择要爬取的主题
 3. 选择爬取模式（普通/热门）
 4. 设置页面范围（普通模式）
 5. 配置代理（如需要）
 6. 点击"开始爬取"
 
-### 2. 代理设置
+### 2️⃣ 代理设置
 1. 点击左侧"设置"菜单
 2. 在代理设置区域启用代理
 3. 输入代理地址（格式：`http://host:port` 或 `socks5://host:port`）
 4. 点击"保存代理设置"
 
-### 3. 定时任务
+### 3️⃣ 定时任务
 1. 在设置页面点击"新建定时任务"
 2. 配置任务名称、主题、模式、页面范围
 3. 选择调度类型：
@@ -103,69 +132,63 @@ docker-compose up -d
 4. 设置执行时间
 5. 保存任务
 
-### 4. 任务监控
+### 4️⃣ 任务监控
 - **实时日志**: 首页实时显示操作日志
 - **任务列表**: 查看所有爬取任务状态
 - **下载结果**: 任务完成后可下载磁力链接文件
 
-## 🔧 技术架构
+## 🏗️ 技术架构
 
 ### 后端技术栈
-- **Python 3.9**: 主要开发语言
-- **Flask**: Web框架
-- **Selenium**: 网页自动化
+- **Python 3.9+**: 主要开发语言
+- **Flask 2.0+**: Web框架
+- **Selenium 4.0+**: 网页自动化
 - **Chrome/ChromeDriver**: 浏览器引擎
 - **BeautifulSoup4**: HTML解析
 
 ### 前端技术栈
-- **React 18**: 前端框架
-- **Ant Design**: UI组件库
+- **React 18.0+**: 前端框架
+- **Ant Design 5.0+**: UI组件库
 - **dayjs**: 日期处理
 
-### 容器化
+### 容器化技术
 - **Docker**: 容器化部署
 - **多阶段构建**: 优化镜像大小
 - **健康检查**: 自动监控服务状态
 
-## 📊 功能特性
+## 📊 功能对比
 
-### 爬取功能
-- ✅ 多主题支持
-- ✅ 普通模式爬取
-- ✅ 热门模式爬取
-- ✅ 批量页面爬取
-- ✅ 代理支持
-- ✅ 实时进度显示
+| 功能 | v1.0 | v2.0 | v2.1.0 |
+|------|------|------|--------|
+| 基础爬取 | ✅ | ✅ | ✅ |
+| 多主题支持 | ✅ | ✅ | ✅ |
+| 热门模式 | ❌ | ✅ | ✅ |
+| 代理支持 | ❌ | ✅ | ✅ |
+| 多页面爬取 | ❌ | ✅ | ✅ |
+| 定时任务 | ❌ | ❌ | ✅ |
+| 设置页面 | ❌ | ❌ | ✅ |
+| 实时日志 | ❌ | ❌ | ✅ |
 
-### 任务管理
-- ✅ 任务状态监控
-- ✅ 任务日志查看
-- ✅ 结果文件下载
-- ✅ 任务删除管理
+## 🔧 配置说明
 
-### 定时功能
-- ✅ 每日定时执行
-- ✅ 每周定时执行
-- ✅ 间隔定时执行
-- ✅ 任务启用/禁用
-- ✅ 执行历史记录
+### 环境变量
+```bash
+FLASK_ENV=production          # Flask环境
+PYTHONUNBUFFERED=1           # Python输出缓冲
+HTTP_PROXY=http://host:port  # HTTP代理
+HTTPS_PROXY=http://host:port # HTTPS代理
+NO_PROXY=localhost,127.0.0.1 # 不使用代理的地址
+```
 
-### 系统功能
-- ✅ 代理配置持久化
-- ✅ 实时日志监控
-- ✅ 健康状态检查
-- ✅ 响应式界面设计
-
-## 🔒 安全说明
-
-- 本工具仅供学习和研究使用
-- 请遵守当地法律法规
-- 使用者需自行承担使用风险
-- 请勿用于商业用途
+### 数据卷
+```bash
+./data:/app/data    # 爬取结果文件
+./logs:/app/logs    # 应用日志文件
+```
 
 ## 📝 更新日志
 
-### v2.1.0 (2024-08-23)
+### v2.1.0 (2024-08-23) 🆕
 - ✨ 新增设置页面
 - ✨ 新增代理配置持久化
 - ✨ 新增定时任务管理
@@ -187,15 +210,40 @@ docker-compose up -d
 - ✨ Web界面
 - ✨ Docker支持
 
-## 🤝 贡献
+## 🔒 安全说明
 
-欢迎提交Issue和Pull Request来改进这个项目。
+<div align="center">
+
+⚠️ **重要提醒**
+
+</div>
+
+- 🎓 本工具仅供学习和研究使用
+- 📜 请遵守当地法律法规
+- ⚠️ 使用者需自行承担使用风险
+- 🚫 请勿用于商业用途
+
+## 🤝 支持与反馈
+
+如果您在使用过程中遇到问题或有改进建议，欢迎：
+
+- 📧 [提交Issue](https://github.com/wyhfx/sehuatang-crawler/issues)
+- 🔄 [提交Pull Request](https://github.com/wyhfx/sehuatang-crawler/pulls)
+- 💬 参与讨论
 
 ## 📄 许可证
 
-本项目仅供学习和研究使用，请遵守相关法律法规。
+本项目采用 [MIT License](LICENSE) 许可证。
 
 ---
 
-**注意**: 使用本工具时请确保遵守当地法律法规，使用者需自行承担使用风险。
+<div align="center">
+
+**享受爬取之旅！** 🚀
+
+Made with ❤️ by [wyhfx](https://github.com/wyhfx)
+
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-wyh3210277395%2Fsehuatang--crawler-blue.svg)](https://hub.docker.com/r/wyh3210277395/sehuatang-crawler)
+
+</div>
 
