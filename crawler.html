@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sehuatang Crawler UI</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 确保样式生效 */
+    body { margin: 0; padding: 0; }
+    #root { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="root"></div>
+
+  <script>
+    const { useState, useEffect } = React;
+    const { createRoot } = ReactDOM;
+
+    const App = () => {
+      const [theme, setTheme] = useState("");
+      const [page, setPage] = useState(1);
+      const [log, setLog] = useState("加载成功，准备操作...\n");
+      const [result, setResult] = useState("");
+      const [isLoading, setIsLoading] = useState(false);
+      const themes = {
+        "36": "亚洲无码",
+        "37": "亚洲有码",
+        "2": "国产原创",
+        "103": "高清中文字幕",
+        "104": "素人原创",
+        "39": "动漫原创",
+        "152": "韩国主播"
+      };
+
+      const handleCrawl = async () => {
+        if (!theme || page <= 0) {
+          setLog(prev => prev + "请选择主题并输入有效页码。\n");
+          return;
+        }
+        setIsLoading(true);
+        setLog(prev => prev + "开始爬取...\n");
+        try {
+          const response = await fetch(`https://sehuatang.org/forum-${theme}-${page}.html`, {
+            method: "GET",
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/139.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+              "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+              "Referer": "https://sehuatang.org/",
+              "Cookie": "cPNj_2132_saltkey=F9K2SkEc; cPNj_2132_lastvisit=1755874267; _safe=Y5mbfT0Ltem37JBB; cPNj_2132_lastfp=d01dd61ee9a85081024b4e292402504f; cf_clearance=PbsAt9T.PORx51n4Q9RMm8dZW7kdqVnV_pdXbehhhyA-1755877876-1.2.1.1-W8_JH4Xzx_drdocxICKAmMo7Jwn1XnxG_2Fbde9W27ysrd8GvLJ13OYtW.xA_SsyBHJqsfAqmk6Bw6vKbgygPBeq4VyQ2WzU._rAC8aESfscYS6mHTMpsklma6yA5M1vkLwMMYJFzhcB967NezaN0d0JIkL.gDDKWSZ0vHZwRLBQmK4ijrVHHpH.Z.jxqPB.xoXlwZo1jA1C_AXeqZ8Q6uQhbeMWeAO7Q4395CE9WEI; cPNj_2132_atarget=1; cPNj_2132_visitedfid=103; cPNj_2132_viewid=tid_2969899; cPNj_2132_lastact=1755878473%09forum.php%09forumdisplay; cPNj_2132_st_t=0%7C1755878473%7C747b9d19343f35f46aa9823add7796d0; cPNj_2132_forum_lastvisit=D_103_1755878473"
+            }
+          });
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const html = await response.text();
+          const parser = new DOMParser();
+          const soup = parser.parseFromString(html, "text/html");
+          const threadUrls = Array.from(soup.querySelectorAll('a[href*="thread-"]'))
+            .map(a => a.getAttribute('href'))
+            .filter(href => href && /thread-\d+-\d+-\d+\.html/.test(href))
+            .map(href => `https://sehuatang.org/${href.split('-1-')[0]}-1-1.html`)
+            .filter((url, index, self) => self.indexOf(url) === index); // 去重
+          setLog(prev => prev + `找到 ${threadUrls.length} 个主题链接。\n`);
+          let magnetLinks = new Set();
+          for (const threadUrl of threadUrls) {
+            setLog(prev => prev + `处理 ${threadUrl}...\n`);
+            const threadResponse = await fetch(threadUrl, { headers });
+            if (threadResponse.ok) {
+              const threadHtml = await threadResponse.text();
+              const threadSoup = parser.parseFromString(threadHtml, "text/html");
+              const links = Array.from(threadSoup.querySelectorAll('div.blockcode, div.t_msgfont, div.postcontent, div.message, p'))
+                .map(tag => tag.textContent)
+                .flatMap(text => [...text.matchAll(/magnet:\?xt=urn:[a-z0-9]+:[a-z0-9]{32,}/gi) || []])
+                .map(match => match[0]);
+              Array.from(threadSoup.querySelectorAll('a'))
+                .filter(a => a.getAttribute('href')?.startsWith('magnet:'))
+                .forEach(a => links.push(a.getAttribute('href')));
+              if (links.length) {
+                magnetLinks = new Set([...magnetLinks, ...links]);
+                setLog(prev => prev + `从 ${threadUrl} 提取到 ${links.length} 个磁力链接。\n`);
+              } else {
+                setLog(prev => prev + `未在 ${threadUrl} 中找到磁力链接。\n`);
+              }
+            }
+            await new Promise(resolve => setTimeout(resolve, 500)); // 模拟time.sleep
+          }
+          if (magnetLinks.size) {
+            const magnetList = Array.from(magnetLinks).join('\n');
+            setResult(magnetList);
+            setLog(prev => prev + `总共找到 ${magnetLinks.size} 个磁力链接。\n`);
+          } else {
+            setLog(prev => prev + "未找到任何磁力链接。\n");
+          }
+        } catch (error) {
+          setLog(prev => prev + `错误: ${error.message}\n`);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      return (
+        <div className="container mx-auto p-4">
+          <h1 className="text-2xl font-bold mb-4">Sehuatang Crawler</h1>
+          <div className="mb-4">
+            <label className="block mb-2">选择主题:</label>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="w-full p-2 border rounded"
+              disabled={isLoading}
+            >
+              <option value="">请选择</option>
+              {Object.entries(themes).map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block mb-2">页面页码:</label>
+            <input
+              type="number"
+              value={page}
+              onChange={(e) => setPage(Math.max(1, Number(e.target.value)))}
+              className="w-full p-2 border rounded"
+              min="1"
+              disabled={isLoading}
+            />
+          </div>
+          <button
+            onClick={handleCrawl}
+            className={`bg-blue-500 text-white p-2 rounded hover:bg-blue-600 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isLoading}
+          >
+            {isLoading ? '爬取中...' : '开始爬取'}
+          </button>
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold">日志</h2>
+            <pre className="bg-gray-200 p-2 rounded overflow-auto h-40">{log}</pre>
+          </div>
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold">磁力链接</h2>
+            <textarea
+              value={result}
+              readOnly
+              className="w-full p-2 border rounded h-40"
+              placeholder="爬取结果将显示在这里"
+            />
+          </div>
+        </div>
+      );
+    };
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

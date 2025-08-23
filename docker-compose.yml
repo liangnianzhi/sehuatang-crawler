@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  sehuatang-crawler:
+    build: .
+    container_name: sehuatang-crawler
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - NO_PROXY=${NO_PROXY:-}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - sehuatang-network
+
+networks:
+  sehuatang-network:
+    driver: bridge
+
+volumes:
+  data:
+  logs:
+
